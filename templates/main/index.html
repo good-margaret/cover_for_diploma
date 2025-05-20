@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Реставрация изображений</h2>
+        <p>Загрузите изображение для обработки</p>
+        
+        {% if user.is_authenticated %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Загрузить и обработать</button>
+        </form>
+        {% else %}
+        <div class="alert alert-info">
+            <p>Для загрузки изображений необходимо <a href="{% url 'login' %}">войти</a> или <a href="{% url 'register' %}">зарегистрироваться</a>.</p>
+        </div>
+        {% endif %}
+
+        {% if messages %}
+             {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}">
+                     {{ message }}
+                  </div>
+             {% endfor %}
+        {% endif %}
+
+        {% if restored_images %}
+        <h3 class="mt-4">Ваши последние изображения</h3>
+        <div class="row">
+
+            {% for img in restored_images %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Оригинал</h5>
+                    </div>
+                    {% if img.original_image %}  <!-- Проверка наличия файла -->
+                         <img src="{{ img.original_image.url }}" class="card-img-top" alt="Original image">
+                    {% else %}
+                          <div class="card-body">Изображение не загружено</div>
+                    {% endif %}
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Результат</h5>
+                    </div>
+                    {% if img.processed_image %}  <!-- Сначала проверяем наличие файла -->
+                        <img src="{{ img.processed_image.url }}" alt="Processed">
+                        <div class="card-footer">
+                            <a href="{{ img.processed_image.url }}" class="btn btn-success" download>Скачать результат</a>
+                        </div>
+                    {% else %}
+                        <p>Изображение еще обрабатывается</p>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
