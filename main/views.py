@@ -16,14 +16,13 @@ def home(request):
     form = ImageUploadForm()
     restored_images = []
 
-    # Получаем последние изображения для авторизованных пользователей
     if request.user.is_authenticated:
         restored_images = ImageRestoration.objects.filter(user=request.user).order_by('-uploaded_at')[:5]
 
     # Обработка POST-запроса (загрузка изображения)
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            return redirect('login')  # Перенаправляем неавторизованных пользователей
+            return redirect('login')
 
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -32,17 +31,14 @@ def home(request):
                 image_restoration.user = request.user
                 image_restoration.save()
 
-                # Обработка изображения
                 process_image(image_restoration)
 
-                return redirect('home')  # Редирект после успешной обработки
+                return redirect('home')
             except Exception as e:
                 # Логирование ошибки
                 print(f"Error processing image: {e}")
                 messages.error(request, "Ошибка при обработке изображения")
 
-
-    # Всегда возвращаем ответ (для GET или невалидной POST-формы)
     return render(request, 'main/index.html', {
         'form': form,
         'restored_images': restored_images
@@ -51,4 +47,4 @@ def home(request):
 
 def about(request):
     return render(request, 'main/about.html')
-# Create your views here.
+

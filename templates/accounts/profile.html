@@ -1,8 +1,60 @@
+
+
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<h2>Личный кабинет</h2>
-<p>Добро пожаловать, {{ user.username }}!</p>
-<p>Email: {{ user.email }}</p>
-<a href="{% url 'home' %}" class="btn btn-primary">К загрузке изображений</a>
+<div class="container">
+    <h2>Личный кабинет</h2>
+    <p>Добро пожаловать, {{ user.username }}!</p>
+
+    <div class="image-gallery">
+        {% for img in user_images %}
+        <div class="image-pair mb-4 p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5>Изображение #{{ forloop.counter }}</h5>
+                <div class="d-flex flex-column">
+                    <form method="post" action="{% url 'profile' %}" class="mb-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_id" value="{{ img.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
+                    </form>
+
+                    {% if img.processed_image %}
+                    <a href="{{ img.processed_image.url }}" download class="btn btn-success btn-sm btn-block">Скачать</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="d-flex">
+                <!-- Оригинальное изображение -->
+                <div class="original-image mr-3 text-center">
+                    <h6>Оригинал</h6>
+                    {% if img.original_image %}
+                    <img src="{{ img.original_image.url }}" class="img-fluid fixed-size-image" alt="Original">
+                    {% endif %}
+                </div>
+
+                <!-- Обработанное изображение -->
+                <div class="processed-image text-center">
+                    <h6>Результат</h6>
+                    {% if img.processed_image %}
+                    <img src="{{ img.processed_image.url }}" class="img-fluid fixed-size-image" alt="Processed">
+                    {% else %}
+                    <p class="text-muted">Обработка не завершена</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-muted small mt-2">
+                Загружено: {{ img.uploaded_at|date:"d.m.Y H:i" }}
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">
+            Вы еще не загружали изображений.
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

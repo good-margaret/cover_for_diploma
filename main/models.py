@@ -9,6 +9,13 @@ class ImageRestoration(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
 
+    def delete(self, *args, **kwargs):
+        # Удаляем файлы изображений при удалении записи
+        self.original_image.delete(save=False)
+        if self.processed_image:
+            self.processed_image.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"Image {self.id} by {self.user.username}"
 
